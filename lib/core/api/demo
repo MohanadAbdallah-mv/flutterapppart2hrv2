@@ -1,0 +1,299 @@
+http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1?q=UsersCode=106019
+
+{
+  "items": [
+    {
+      "EmpCode": 7104,
+      "Serial": 1,
+      "CompEmpCode": 103150,
+      "TrnsDate": "2025-11-05T00:00:00+03:00",
+      "TrnsType": 4,
+      "PrmDate": "2025-11-06T00:00:00+03:00",
+      "FromTime": "2025-11-06T08:00:00+03:00",
+      "ToTime": "2025-11-06T16:00:00+03:00",
+      "AproveFlag": 0,
+      "PermReasons": "طلب تحرك سيارة في مهمة عمل خارجية",
+      "InsertUser": 0,
+      "AltKey": "7104-1",
+      "Notes": "طلب استئذان الموظف احمد خلف الله مهران خلف الله  عن يوم 06/11/25",
+      "CarNo": "32123123",
+      "PrevSer": 11,
+      "EmpName": "احمد خلف الله مهران خلف الله",
+      "EmpNameE": "AHMED KHALAFALLA",
+      "UsersCode": 106019,
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1",
+          "name": "PyOrderCarHProcessVRO1",
+          "kind": "item"
+        },
+        {
+          "rel": "canonical",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1",
+          "name": "PyOrderCarHProcessVRO1",
+          "kind": "item"
+        },
+        {
+          "rel": "child",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1/child/PyOrderCarHAuthVRO",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "collection"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "hasMore": false,
+  "limit": 5,
+  "offset": 0,
+  "links": [
+    {
+      "rel": "self",
+      "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1",
+      "name": "PyOrderCarHProcessVRO1",
+      "kind": "collection"
+    }
+  ]
+}
+
+
+
+
+
+http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1/child/PyOrderCarHAuthVRO
+
+
+{
+  "items": [
+    {
+      "AltKey": "PY_ORDER_CAR_H-1-7104-1",
+      "AuthDate": "23-10-2025 10:35 am",
+      "AuthFlag": 1,
+      "AuthPk1": "7104",
+      "AuthPk2": "1",
+      "AuthTableName": "PY_ORDER_CAR_H",
+      "PrevSer": 1,
+      "UsersCode": 103150,
+      "UsersDesc": "تم الاعتماد",
+      "UsersName": "احمد خلف الله",
+      "UsersNameE": null,
+      "JobDesc": "مدير تكنولوجيا المعلومات والنظام",
+      "JobDescE": "IT and System Manager",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1/child/PyOrderCarHAuthVRO/PY_ORDER_CAR_H-1-7104-1",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "item"
+        },
+        {
+          "rel": "canonical",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1/child/PyOrderCarHAuthVRO/PY_ORDER_CAR_H-1-7104-1",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "item"
+        },
+        {
+          "rel": "parent",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1",
+          "name": "PyOrderCarHProcessVRO1",
+          "kind": "item"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "hasMore": false,
+  "limit": 5,
+  "offset": 0,
+  "links": [
+    {
+      "rel": "self",
+      "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHProcessVRO1/7104-1/child/PyOrderCarHAuthVRO",
+      "name": "PyOrderCarHAuthVRO",
+      "kind": "collection"
+    }
+  ]
+}
+
+
+
+
+http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1?q=EmpCode=7104
+
+
+{
+  "items": [
+    {
+      "EmpCode": 7104,
+      "Serial": 1,
+      "CarNo": "32123123",
+      "CompEmpCode": 103150,
+      "TrnsDate": "2025-11-05T00:00:00+03:00",
+      "TrnsType": 4,
+      "PrmDate": "2025-11-06T00:00:00+03:00",
+      "FromTime": "2025-11-06T08:00:00+03:00",
+      "ToTime": "2025-11-06T16:00:00+03:00",
+      "AproveFlag": 0,
+      "ReasonType": 3,
+      "PermReasons": "طلب تحرك سيارة في مهمة عمل خارجية",
+      "Notes": "طلب استئذان الموظف احمد خلف الله مهران خلف الله  عن يوم 06/11/25",
+      "DCode": 1110601,
+      "InsertUser": 0,
+      "DayType": 2,
+      "AltKey": "7104-1",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1",
+          "name": "PyOrderCarHVO1",
+          "kind": "item"
+        },
+        {
+          "rel": "canonical",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1",
+          "name": "PyOrderCarHVO1",
+          "kind": "item"
+        },
+        {
+          "rel": "child",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1/child/PyOrderCarHAuthVRO",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "collection"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "hasMore": false,
+  "limit": 5,
+  "offset": 0,
+  "links": [
+    {
+      "rel": "self",
+      "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1",
+      "name": "PyOrderCarHVO1",
+      "kind": "collection"
+    }
+  ]
+}
+
+
+
+http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1/child/PyOrderCarHAuthVRO
+
+
+
+{
+  "items": [
+    {
+      "AltKey": "PY_ORDER_CAR_H-1-7104-1",
+      "AuthDate": "23-10-2025 10:35 am",
+      "AuthFlag": 1,
+      "AuthPk1": "7104",
+      "AuthPk2": "1",
+      "AuthTableName": "PY_ORDER_CAR_H",
+      "PrevSer": 1,
+      "UsersCode": 103150,
+      "UsersDesc": "تم الاعتماد",
+      "UsersName": "احمد خلف الله",
+      "UsersNameE": null,
+      "JobDesc": "مدير تكنولوجيا المعلومات والنظام",
+      "JobDescE": "IT and System Manager",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1/child/PyOrderCarHAuthVRO/PY_ORDER_CAR_H-1-7104-1",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "item"
+        },
+        {
+          "rel": "canonical",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1/child/PyOrderCarHAuthVRO/PY_ORDER_CAR_H-1-7104-1",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "item"
+        },
+        {
+          "rel": "parent",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1",
+          "name": "PyOrderCarHVO1",
+          "kind": "item"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "hasMore": false,
+  "limit": 5,
+  "offset": 0,
+  "links": [
+    {
+      "rel": "self",
+      "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1/child/PyOrderCarHAuthVRO",
+      "name": "PyOrderCarHAuthVRO",
+      "kind": "collection"
+    }
+  ]
+}
+
+
+
+
+http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1
+
+
+{
+  "items": [
+    {
+      "EmpCode": 7104,
+      "Serial": 1,
+      "CarNo": "32123123",
+      "CompEmpCode": 103150,
+      "TrnsDate": "2025-11-05T00:00:00+03:00",
+      "TrnsType": 4,
+      "PrmDate": "2025-11-06T00:00:00+03:00",
+      "FromTime": "2025-11-06T08:00:00+03:00",
+      "ToTime": "2025-11-06T16:00:00+03:00",
+      "AproveFlag": 0,
+      "ReasonType": 3,
+      "PermReasons": "طلب تحرك سيارة في مهمة عمل خارجية",
+      "Notes": "طلب استئذان الموظف احمد خلف الله مهران خلف الله  عن يوم 06/11/25",
+      "DCode": 1110601,
+      "InsertUser": 0,
+      "DayType": 2,
+      "AltKey": "7104-1",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1",
+          "name": "PyOrderCarHVO1",
+          "kind": "item"
+        },
+        {
+          "rel": "canonical",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1",
+          "name": "PyOrderCarHVO1",
+          "kind": "item"
+        },
+        {
+          "rel": "child",
+          "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1/7104-1/child/PyOrderCarHAuthVRO",
+          "name": "PyOrderCarHAuthVRO",
+          "kind": "collection"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "hasMore": false,
+  "limit": 5,
+  "offset": 0,
+  "links": [
+    {
+      "rel": "self",
+      "href": "http://salwmynew.ddns.net:7101/TdpSelfServiceWebSrvc-RESTWebService-context-root/rest/V1/PyOrderCarHVO1",
+      "name": "PyOrderCarHVO1",
+      "kind": "collection"
+    }
+  ]
+}
