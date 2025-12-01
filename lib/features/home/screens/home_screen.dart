@@ -1072,7 +1072,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(localizations, localeProvider),
+            _buildHeader(localizations, localeProvider,authProvider),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -1103,7 +1103,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeader(AppLocalizations localizations, LocaleProvider localeProvider) {
+  Widget _buildHeader(AppLocalizations localizations, LocaleProvider localeProvider,AuthProvider authProvider) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -1153,9 +1153,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       // زر تسجيل الخروج
                       GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (c) => const LoginScreen()));
+                        onTap: () async {
+                          await authProvider.logout();
+                          // if(mounted){
+                          //   Navigator.of(context).pushReplacement(
+                          //       MaterialPageRoute(builder: (c) => const LoginScreen()));
+                          // }
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
