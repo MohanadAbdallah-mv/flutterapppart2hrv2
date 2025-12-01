@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui'; // Required for ImageFilter.blur
 
 import 'package:flutter/material.dart';
@@ -89,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Future<void> _performLogin() async {
     final l10n = AppLocalizations.of(context)!;
+    print('Current widget: ${context.widget.runtimeType}'); // LoginScreen
 
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -97,13 +99,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         _passwordController.text.trim(),
       );
 
-      if (success && mounted) {
+      if (!mounted) return;
+
+      if (success) {
+        final navigator = Navigator.of(context);
+
         _showStyledDialog(
           message: l10n.loginSuccessMessage ?? "تم تسجيل الدخول بنجاح",
           isSuccess: true,
+          barrierDismissible: false,
           onContinue: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+            // Navigate directly when button is pressed
+            navigator.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => HomeScreen()),
+                  (route) => false,
+            );
           },
         );
       } else if (mounted) {
@@ -123,13 +133,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     required String message,
     required bool isSuccess,
     required VoidCallback onContinue,
+    bool barrierDismissible=true
   }) {
     final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
+      barrierDismissible: barrierDismissible,
       builder: (BuildContext context) {
         return Dialog(
+
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
