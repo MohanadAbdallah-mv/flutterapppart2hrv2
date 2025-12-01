@@ -1006,4 +1006,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelSalaryConfirmationActionDialogTitle => 'Decision on Cancel Salary Confirmation';
+
+  @override
+  String get requestForMyself => 'Request for Myself';
+
+  @override
+  String get requestForWorker => 'Request for Anther Emp';
+
+  @override
+  String get workerName => 'Emp Name';
+
+  @override
+  String get workerNumber => 'Emp Number';
+
+  @override
+  String get selectWorkerError => 'Please select a Employee first';
+
+  @override
+  String get permissionType5 => 'External Deputation';
+
+  @override
+  String get permissionEndDateLabel => 'End Date';
+
+  @override
+  String get selectPermissionEndDateValidation => 'Please select end date';
 }

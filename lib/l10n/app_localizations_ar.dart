@@ -1006,4 +1006,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelSalaryConfirmationActionDialogTitle => 'اتخاذ قرار بشأن إلغاء تثبيت الراتب';
+
+  @override
+  String get requestForMyself => 'طلب لنفسي';
+
+  @override
+  String get requestForWorker => 'طلب لموظف اخر';
+
+  @override
+  String get workerName => 'اسم الموظف';
+
+  @override
+  String get workerNumber => 'رقم الموظف';
+
+  @override
+  String get selectWorkerError => 'من فضلك اختر الموظف أولاً';
+
+  @override
+  String get permissionType5 => 'انتداب خارجي';
+
+  @override
+  String get permissionEndDateLabel => 'تاريخ الانتهاء';
+
+  @override
+  String get selectPermissionEndDateValidation => 'الرجاء اختيار تاريخ الانتهاء';
 }
