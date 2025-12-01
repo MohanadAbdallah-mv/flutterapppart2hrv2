@@ -332,5 +332,13 @@
         "newCancelSalaryConfirmationRequest": "طلب إلغاء تثبيت راتب جديد",
         "cancelSalaryConfirmationRequestDetails": "تفاصيل طلب إلغاء تثبيت الراتب",
         "cancelSalaryConfirmationRequestSentSuccessfully": "تم إرسال طلب إلغاء تثبيت الراتب بنجاح.",
-        "cancelSalaryConfirmationActionDialogTitle": "اتخاذ قرار بشأن إلغاء تثبيت الراتب"
+        "cancelSalaryConfirmationActionDialogTitle": "اتخاذ قرار بشأن إلغاء تثبيت الراتب",
+        "requestForMyself": "طلب لنفسي",
+        "requestForWorker": "طلب لموظف اخر",
+        "workerName": "اسم الموظف",
+        "workerNumber": "رقم الموظف",
+        "selectWorkerError": "من فضلك اختر الموظف أولاً",
+        "permissionType5": "انتداب خارجي",
+        "permissionEndDateLabel": "تاريخ الانتهاء",
+        "selectPermissionEndDateValidation": "الرجاء اختيار تاريخ الانتهاء"
     }

@@ -1,15 +1,21 @@
-// lib/features/loans/screens/my_requests/new_loan_request_screen.dart
+// features/loans/screens/my_requests/new_loan_request_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutterapppart2hr/features/purchases/widgets/language_switcher_button.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../../l10n/app_localizations.dart';
-import '../../../../core/models/loan_type_model.dart';
-import '../../../../core/providers/hr_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+
+
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/hr_provider.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/models/worker_model.dart';
+import '../../../../core/models/loan_type_model.dart';
+import '../../../purchases/widgets/language_switcher_button.dart';
 
+import '../../../../l10n/app_localizations.dart';
+import '../../../purchases/widgets/language_switcher_button.dart';
 
 class NewLoanRequestScreen extends StatefulWidget {
   static const String routeName = '/new-loan-request';
@@ -29,13 +35,28 @@ class _NewLoanRequestScreenState extends State<NewLoanRequestScreen> {
   final _installmentValueController = TextEditingController();
   final _notesController = TextEditingController();
 
+  // ---== متغيرات العمال ==---
+  bool _isForWorker = false;
+  WorkerModel? _selectedWorker;
+
   @override
   void initState() {
     super.initState();
-    // Logic for auto-calculating fields remains the same
+    // Logic for auto-calculating fields
     _totalValueController.addListener(_onAmountChanged);
     _installmentCountController.addListener(_onAmountChanged);
     _installmentValueController.addListener(_onAmountChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // التأكد من جلب العمال عند فتح الشاشة
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final hrProvider = Provider.of<HrProvider>(context, listen: false);
+    if (hrProvider.workersList.isEmpty && authProvider.currentUser != null) {
+      hrProvider.fetchWorkersList(authProvider.currentUser!.usersCode);
+    }
   }
 
   void _onAmountChanged() {
@@ -76,15 +97,29 @@ class _NewLoanRequestScreenState extends State<NewLoanRequestScreen> {
   Future<void> _saveForm() async {
     final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
+
+    if (_isForWorker && _selectedWorker == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.selectWorkerError ?? "Please select a worker"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     _formKey.currentState!.save();
 
     final hrProvider = Provider.of<HrProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
+    // تحديد بيانات الموظف (صاحب الطلب الفعلي)
+    final int targetEmpCode = _isForWorker ? _selectedWorker!.empCode : authProvider.currentUser!.empCode;
+    final int targetCompEmpCode = _isForWorker ? _selectedWorker!.compEmpCode : authProvider.currentUser!.compEmpCode;
+    // المستخدم الذي يقوم بالإدخال (دائماً أنا)
+    final int insertingUserCode = authProvider.currentUser!.usersCode;
+
     final success = await hrProvider.createNewLoanRequest(
-      empCode: authProvider.currentUser!.empCode,
-      compEmpCode: authProvider.currentUser!.compEmpCode,
-      userCode: authProvider.currentUser!.usersCode,
+      empCode: targetEmpCode,
+      compEmpCode: targetCompEmpCode,
+      userCode: insertingUserCode,
       loanType: _selectedLoanType!,
       startDate: _startDate!,
       installmentsCount: int.parse(_installmentCountController.text),
@@ -106,6 +141,9 @@ class _NewLoanRequestScreenState extends State<NewLoanRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final hrProvider = Provider.of<HrProvider>(context);
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.newLoanRequestTitle),
@@ -122,6 +160,114 @@ class _NewLoanRequestScreenState extends State<NewLoanRequestScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ---== كارت اختيار نوع الطلب (جديد) ==---
+              Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RadioListTile<bool>(
+                              title: Text(l10n.requestForMyself ?? "For Me"),
+                              value: false,
+                              groupValue: _isForWorker,
+                              onChanged: (val) {
+                                setState(() {
+                                  _isForWorker = val!;
+                                  _selectedWorker = null;
+                                });
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: RadioListTile<bool>(
+                              title: Text(l10n.requestForWorker ?? "For Worker"),
+                              value: true,
+                              groupValue: _isForWorker,
+                              onChanged: (val) {
+                                setState(() {
+                                  _isForWorker = val!;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      if (_isForWorker) ...[
+                        const Divider(),
+
+                        // 1. بحث باسم العامل
+                        DropdownSearch<WorkerModel>(
+                          items: (filter, loadProps) => hrProvider.workersList,
+                          itemAsString: (WorkerModel u) => isArabic ? u.empName : (u.empNameE ?? u.empName),
+                          compareFn: (item1, item2) => item1.empCode == item2.empCode,
+                          selectedItem: _selectedWorker,
+                          decoratorProps: DropDownDecoratorProps(
+                            decoration: InputDecoration(
+                              labelText: l10n.workerName ?? "Worker Name",
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.person_search),
+                            ),
+                          ),
+                          popupProps: const PopupProps.menu(
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              decoration: InputDecoration(
+                                hintText: "بحث...",
+                                prefixIcon: Icon(Icons.search),
+                              ),
+                            ),
+                          ),
+                          onChanged: (WorkerModel? data) {
+                            setState(() {
+                              _selectedWorker = data;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // 2. بحث برقم العامل
+                        DropdownSearch<WorkerModel>(
+                          items: (filter, loadProps) => hrProvider.workersList,
+                          itemAsString: (WorkerModel u) => u.compEmpCode.toString(),
+                          compareFn: (item1, item2) => item1.empCode == item2.empCode,
+                          selectedItem: _selectedWorker,
+                          decoratorProps: DropDownDecoratorProps(
+                            decoration: InputDecoration(
+                              labelText: l10n.workerNumber ?? "Worker Number",
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.badge),
+                            ),
+                          ),
+                          popupProps: const PopupProps.menu(
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              decoration: InputDecoration(
+                                hintText: "بحث بالرقم...",
+                                prefixIcon: Icon(Icons.search),
+                              ),
+                            ),
+                          ),
+                          onChanged: (WorkerModel? data) {
+                            setState(() {
+                              _selectedWorker = data;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              // ---== نهاية الجزء الجديد ==---
+
               _buildSectionTitle(l10n.requestData),
               const SizedBox(height: 16),
               _buildDropdown(context.watch<HrProvider>().loanTypes),

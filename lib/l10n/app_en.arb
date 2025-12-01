@@ -332,5 +332,13 @@
         "newCancelSalaryConfirmationRequest": "New Cancel Salary Confirmation Request",
         "cancelSalaryConfirmationRequestDetails": "Cancel Salary Confirmation Request Details",
         "cancelSalaryConfirmationRequestSentSuccessfully": "Cancel salary confirmation request sent successfully.",
-        "cancelSalaryConfirmationActionDialogTitle": "Decision on Cancel Salary Confirmation"
+        "cancelSalaryConfirmationActionDialogTitle": "Decision on Cancel Salary Confirmation",
+        "requestForMyself": "Request for Myself",
+        "requestForWorker": "Request for Anther Emp",
+        "workerName": "Emp Name",
+        "workerNumber": "Emp Number",
+        "selectWorkerError": "Please select a Employee first",
+        "permissionType5": "External Deputation",
+        "permissionEndDateLabel": "End Date",
+        "selectPermissionEndDateValidation": "Please select end date"
 }

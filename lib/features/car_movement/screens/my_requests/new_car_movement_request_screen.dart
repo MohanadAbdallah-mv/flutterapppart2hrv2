@@ -1,13 +1,17 @@
 // lib/features/car_movement/screens/my_requests/new_car_movement_request_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutterapppart2hr/features/purchases/widgets/language_switcher_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:dropdown_search/dropdown_search.dart'; // إضافة
+
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/hr_provider.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/models/worker_model.dart'; // إضافة
 
 class NewCarMovementRequestScreen extends StatefulWidget {
   static const String routeName = '/new-car-movement-request';
@@ -22,12 +26,16 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
 
   int? _selectedPermissionType;
   int? _selectedReasonType;
-  DateTime? _movementDate; // التاريخ اللي هيحصل فيه التحرك
+  DateTime? _movementDate;
   TimeOfDay? _fromTime;
   TimeOfDay? _toTime;
   final TextEditingController _reasonsController = TextEditingController();
   final TextEditingController _carNoController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+
+  // ---== متغيرات العمال ==---
+  bool _isForWorker = false;
+  WorkerModel? _selectedWorker;
 
   Map<int, String> _permissionTypes = {};
   Map<int, String> _reasonTypes = {};
@@ -35,7 +43,6 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Populate maps from l10n
     final l10n = AppLocalizations.of(context)!;
     _permissionTypes = {
       1: l10n.permissionType1,
@@ -48,6 +55,13 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
       2: l10n.reasonType2,
       3: l10n.reasonType3,
     };
+
+    // جلب العمال
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final hrProvider = Provider.of<HrProvider>(context, listen: false);
+    if (hrProvider.workersList.isEmpty && authProvider.currentUser != null) {
+      hrProvider.fetchWorkersList(authProvider.currentUser!.usersCode);
+    }
   }
 
   @override
@@ -95,18 +109,31 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
   }
 
   void _submitForm() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    // التحقق من العامل
+    if (_isForWorker && _selectedWorker == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.selectWorkerError ?? "Please select a worker"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     final hrProvider = Provider.of<HrProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
     if (user == null) return;
 
-    // دمج التاريخ مع الوقت زي ما الـ API عاوز
+    // ---== تحديد البيانات ==---
+    final int targetEmpCode = _isForWorker ? _selectedWorker!.empCode : user.empCode;
+    final int targetCompEmpCode = _isForWorker ? _selectedWorker!.compEmpCode : user.compEmpCode;
+    final String targetUserName = _isForWorker ? _selectedWorker!.empName : user.usersName;
+    final int insertingUserCode = user.usersCode;
+
     final DateTime fromDateTime = DateTime(_movementDate!.year, _movementDate!.month, _movementDate!.day, _fromTime!.hour, _fromTime!.minute);
     final DateTime toDateTime = DateTime(_movementDate!.year, _movementDate!.month, _movementDate!.day, _toTime!.hour, _toTime!.minute);
 
@@ -115,25 +142,34 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
       return;
     }
 
+    final locale = Provider.of<LocaleProvider>(context, listen: false).locale.toLanguageTag();
+    final String prmDateStr = DateFormat.yMd(locale).format(_movementDate!);
+    final String fromTimeStr = _formatTimeOfDay(_fromTime!, locale);
+    final String toTimeStr = _formatTimeOfDay(_toTime!, locale);
+
+    String permissionTypeName = _permissionTypes[_selectedPermissionType] ?? "N/A";
+    // ملاحظات بالاسم الصحيح
+    final String notes = "طلب $permissionTypeName الموظف $targetUserName عن يوم $prmDateStr من الفترة من $fromTimeStr الى $toTimeStr";
+
     final bool success = await hrProvider.createCarMovementRequest(
-      empCode: user.empCode,
-      userCode: user.usersCode,
-      insertUser: user.usersCode,
-      compEmpCode: user.compEmpCode,
+      userCode: insertingUserCode,
+      empCode: targetEmpCode,
+      compEmpCode: targetCompEmpCode,
+      insertUser: insertingUserCode,
       trnsType: _selectedPermissionType!,
       reasonType: _selectedReasonType!,
-      prmDate: _movementDate!, // PrmDate بياخد التاريخ
-      fromTime: fromDateTime, // FromTime بياخد التاريخ + وقت البدء
-      toTime: toDateTime,   // ToTime بياخد التاريخ + وقت الانتهاء
+      prmDate: _movementDate!,
+      fromTime: fromDateTime,
+      toTime: toDateTime,
       carNo: _carNoController.text,
       permReasons: _reasonsController.text,
-      notes: _notesController.text,
+      notes: notes,
     );
 
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.carMovementRequestSentSuccessfully), backgroundColor: Colors.green));
-        Navigator.of(context).pop(true); // Pop with success
+        Navigator.of(context).pop(true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(hrProvider.error ?? l10n.actionFailed), backgroundColor: Colors.red));
       }
@@ -145,19 +181,82 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
     final l10n = AppLocalizations.of(context)!;
     final locale = Provider.of<LocaleProvider>(context, listen: false).locale.toLanguageTag();
     final hrProvider = Provider.of<HrProvider>(context);
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.newCarMovementRequest),
         actions: const [LanguageSwitcherButton()],
       ),
-      body: Form(
+      body: hrProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // ---== كارت العمال ==---
+              Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RadioListTile<bool>(
+                              title: Text(l10n.requestForMyself ?? "For Me"),
+                              value: false,
+                              groupValue: _isForWorker,
+                              onChanged: (val) => setState(() { _isForWorker = val!; _selectedWorker = null; }),
+                            ),
+                          ),
+                          Expanded(
+                            child: RadioListTile<bool>(
+                              title: Text(l10n.requestForWorker ?? "For Worker"),
+                              value: true,
+                              groupValue: _isForWorker,
+                              onChanged: (val) => setState(() => _isForWorker = val!),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_isForWorker) ...[
+                        const Divider(),
+                        DropdownSearch<WorkerModel>(
+                          items: (filter, loadProps) => hrProvider.workersList,
+                          itemAsString: (u) => isArabic ? u.empName : (u.empNameE ?? u.empName),
+                          compareFn: (i1, i2) => i1.empCode == i2.empCode,
+                          selectedItem: _selectedWorker,
+                          decoratorProps: DropDownDecoratorProps(
+                            decoration: InputDecoration(labelText: l10n.workerName ?? "Worker Name", border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.person_search)),
+                          ),
+                          popupProps: const PopupProps.menu(showSearchBox: true, searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: "بحث...", prefixIcon: Icon(Icons.search)))),
+                          onChanged: (data) => setState(() => _selectedWorker = data),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownSearch<WorkerModel>(
+                          items: (filter, loadProps) => hrProvider.workersList,
+                          itemAsString: (u) => u.compEmpCode.toString(),
+                          compareFn: (i1, i2) => i1.empCode == i2.empCode,
+                          selectedItem: _selectedWorker,
+                          decoratorProps: DropDownDecoratorProps(
+                            decoration: InputDecoration(labelText: l10n.workerNumber ?? "Worker Number", border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.badge)),
+                          ),
+                          popupProps: const PopupProps.menu(showSearchBox: true, searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: "بحث بالرقم...", prefixIcon: Icon(Icons.search)))),
+                          onChanged: (data) => setState(() => _selectedWorker = data),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
               _buildDropdown(
                 label: l10n.permissionTypeLabel,
                 value: _selectedPermissionType,
@@ -176,7 +275,7 @@ class _NewCarMovementRequestScreenState extends State<NewCarMovementRequestScree
               const SizedBox(height: 16),
 
               _buildDatePicker(
-                label: l10n.carMovementDateLabel, // <-- تم استخدام الليبل الجديد
+                label: l10n.carMovementDateLabel,
                 date: _movementDate,
                 onPressed: _selectDate,
                 validator: (value) => _movementDate == null ? l10n.selectCarMovementDateValidation : null,

@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutterapppart2hr/features/purchases/widgets/language_switcher_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:dropdown_search/dropdown_search.dart'; // إضافة
 import '../../../../l10n/app_localizations.dart';
 
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/hr_provider.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/models/worker_model.dart'; // إضافة
 // ---== Imports جديدة للـ Dropdowns ==---
 import '../../models/company_model.dart';
 import '../../models/department_model.dart';
@@ -27,14 +29,15 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
 
   DateTime? _movingDate;
 
-  // ---== تم التعديل: من Controllers إلى متغيرات ==---
   int? _selectedCompanyCode;
   int? _selectedDCode;
-  // ---== نهاية التعديل ==---
-
 
   final TextEditingController _movingNoteController = TextEditingController();
   final TextEditingController _movingNoteEController = TextEditingController();
+
+  // ---== متغيرات العمال ==---
+  bool _isForWorker = false;
+  WorkerModel? _selectedWorker;
 
   @override
   void initState() {
@@ -44,6 +47,17 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
       Provider.of<HrProvider>(context, listen: false).fetchCompanies();
       Provider.of<HrProvider>(context, listen: false).clearDepartments(); // تنظيف قائمة الإدارات القديمة
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // جلب العمال
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final hrProvider = Provider.of<HrProvider>(context, listen: false);
+    if (hrProvider.workersList.isEmpty && authProvider.currentUser != null) {
+      hrProvider.fetchWorkersList(authProvider.currentUser!.usersCode);
+    }
   }
 
   @override
@@ -73,34 +87,44 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
     }
 
     final l10n = AppLocalizations.of(context)!;
+
+    // التحقق من العامل
+    if (_isForWorker && _selectedWorker == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.selectWorkerError ?? "Please select a worker"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     final hrProvider = Provider.of<HrProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final user = authProvider.currentUser;
 
     if (user == null) return;
 
-    // ---== تم التعديل: استخدام المتغيرات بدلًا من الـ Controllers ==---
     final int? companyCodeNew = _selectedCompanyCode;
     final int? dCodeNew = _selectedDCode;
-    // ---== نهاية التعديل ==---
-
-
 
     if (companyCodeNew == null || dCodeNew == null ) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.numericFieldsError), backgroundColor: Colors.red));
       return;
     }
 
+    // ---== تحديد البيانات ==---
+    final int targetEmpCode = _isForWorker ? _selectedWorker!.empCode : user.empCode;
+    final int targetCompEmpCode = _isForWorker ? _selectedWorker!.compEmpCode : user.compEmpCode;
+    final int insertingUserCode = user.usersCode;
+
     final bool success = await hrProvider.createEmployeeTransferRequest(
-        empCode: user.empCode,
-        insertUser: user.usersCode,
+        empCode: targetEmpCode,
+        insertUser: insertingUserCode,
         companyCodeNew: companyCodeNew,
         dCodeNew: dCodeNew,
-        compEmpCodeNew: user.compEmpCode,
+        compEmpCodeNew: targetCompEmpCode,
         movingDate: _movingDate!,
         movingNote: _movingNoteController.text,
         movingNoteE: _movingNoteEController.text,
-        userCode: user.usersCode
+        userCode: insertingUserCode
     );
 
     if (mounted) {
@@ -131,6 +155,66 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // ---== كارت العمال ==---
+              Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RadioListTile<bool>(
+                              title: Text(l10n.requestForMyself ?? "For Me"),
+                              value: false,
+                              groupValue: _isForWorker,
+                              onChanged: (val) => setState(() { _isForWorker = val!; _selectedWorker = null; }),
+                            ),
+                          ),
+                          Expanded(
+                            child: RadioListTile<bool>(
+                              title: Text(l10n.requestForWorker ?? "For Worker"),
+                              value: true,
+                              groupValue: _isForWorker,
+                              onChanged: (val) => setState(() => _isForWorker = val!),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_isForWorker) ...[
+                        const Divider(),
+                        DropdownSearch<WorkerModel>(
+                          items: (filter, loadProps) => hrProvider.workersList,
+                          itemAsString: (u) => isArabic ? u.empName : (u.empNameE ?? u.empName),
+                          compareFn: (i1, i2) => i1.empCode == i2.empCode,
+                          selectedItem: _selectedWorker,
+                          decoratorProps: DropDownDecoratorProps(
+                            decoration: InputDecoration(labelText: l10n.workerName ?? "Worker Name", border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.person_search)),
+                          ),
+                          popupProps: const PopupProps.menu(showSearchBox: true, searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: "بحث...", prefixIcon: Icon(Icons.search)))),
+                          onChanged: (data) => setState(() => _selectedWorker = data),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownSearch<WorkerModel>(
+                          items: (filter, loadProps) => hrProvider.workersList,
+                          itemAsString: (u) => u.compEmpCode.toString(),
+                          compareFn: (i1, i2) => i1.empCode == i2.empCode,
+                          selectedItem: _selectedWorker,
+                          decoratorProps: DropDownDecoratorProps(
+                            decoration: InputDecoration(labelText: l10n.workerNumber ?? "Worker Number", border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.badge)),
+                          ),
+                          popupProps: const PopupProps.menu(showSearchBox: true, searchFieldProps: TextFieldProps(decoration: InputDecoration(hintText: "بحث بالرقم...", prefixIcon: Icon(Icons.search)))),
+                          onChanged: (data) => setState(() => _selectedWorker = data),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
               _buildDatePicker(
                 label: l10n.transferDate,
                 date: _movingDate,
@@ -139,15 +223,14 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
               ),
               const SizedBox(height: 16),
 
-              // ---== تم التعديل: استخدام Dropdown للشركات ==---
+              // ---== استخدام Dropdown للشركات ==---
               _buildCompanyDropdown(hrProvider, l10n, isArabic),
               const SizedBox(height: 16),
 
-              // ---== تم التعديل: استخدام Dropdown للإدارات ==---
+              // ---== استخدام Dropdown للإدارات ==---
               _buildDepartmentDropdown(hrProvider, l10n, isArabic),
               const SizedBox(height: 16),
 
-              // (حقل المدير الجديد كما هو)
               const SizedBox(height: 16),
               _buildTextField(_movingNoteController, l10n.transferNotesAr, Icons.notes_outlined, maxLines: 2),
               const SizedBox(height: 16),
@@ -170,7 +253,7 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
     );
   }
 
-  // ---== ودجت جديدة: قائمة الشركات ==---
+  // ---== ودجت الشركات ==---
   Widget _buildCompanyDropdown(HrProvider hrProvider, AppLocalizations l10n, bool isArabic) {
     return DropdownButtonFormField<int>(
       value: _selectedCompanyCode,
@@ -191,19 +274,18 @@ class _NewEmployeeTransferRequestScreenState extends State<NewEmployeeTransferRe
         if (newValue != null) {
           setState(() {
             _selectedCompanyCode = newValue;
-            _selectedDCode = null; // تفريغ الإدارة القديمة
+            _selectedDCode = null;
           });
-          hrProvider.clearDepartments(); // تنظيف القائمة
-          hrProvider.fetchDepartments(newValue); // جلب الإدارات الجديدة
+          hrProvider.clearDepartments();
+          hrProvider.fetchDepartments(newValue);
         }
       },
       validator: (value) => value == null ? l10n.selectCompany : null,
     );
   }
 
-  // ---== ودجت جديدة: قائمة الإدارات ==---
+  // ---== ودجت الإدارات ==---
   Widget _buildDepartmentDropdown(HrProvider hrProvider, AppLocalizations l10n, bool isArabic) {
-    // تعطيل القائمة إذا لم يتم اختيار شركة أو إذا كانت القائمة فارغة
     bool isDisabled = _selectedCompanyCode == null || hrProvider.departments.isEmpty;
 
     return DropdownButtonFormField<int>(

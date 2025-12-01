@@ -2080,6 +2080,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decision on Cancel Salary Confirmation'**
   String get cancelSalaryConfirmationActionDialogTitle;
+
+  /// No description provided for @requestForMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Request for Myself'**
+  String get requestForMyself;
+
+  /// No description provided for @requestForWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Request for Anther Emp'**
+  String get requestForWorker;
+
+  /// No description provided for @workerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Emp Name'**
+  String get workerName;
+
+  /// No description provided for @workerNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Emp Number'**
+  String get workerNumber;
+
+  /// No description provided for @selectWorkerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a Employee first'**
+  String get selectWorkerError;
+
+  /// No description provided for @permissionType5.
+  ///
+  /// In en, this message translates to:
+  /// **'External Deputation'**
+  String get permissionType5;
+
+  /// No description provided for @permissionEndDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get permissionEndDateLabel;
+
+  /// No description provided for @selectPermissionEndDateValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select end date'**
+  String get selectPermissionEndDateValidation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

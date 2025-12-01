@@ -52,6 +52,8 @@ import 'package:flutterapppart2hr/features/cancel_salary_confirmation/models/can
 import 'package:flutterapppart2hr/features/cancel_salary_confirmation/models/cancel_salary_confirmation_auth_model.dart';
 
 
+import '../models/worker_model.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -979,6 +981,7 @@ class HrProvider with ChangeNotifier {
     required int trnsType,
     required int reasonType,
     required DateTime prmDate,
+    DateTime? prmToDate, // <--- باراميتر جديد (اختياري)
     required DateTime fromTime,
     required DateTime toTime,
     required String permReasons,
@@ -998,6 +1001,25 @@ class HrProvider with ChangeNotifier {
         return DateFormat("yyyy-MM-dd'T'00:00:00Z").format(dt);
       }
 
+      String formatDateTimeWithTimezone(DateTime dt) {
+        String twoDigits(int n) => n.toString().padLeft(2, '0');
+        String y = dt.year.toString();
+        String m = twoDigits(dt.month);
+        String d = twoDigits(dt.day);
+        String h = twoDigits(dt.hour);
+        String min = twoDigits(dt.minute);
+        String sec = twoDigits(dt.second);
+        return "$y-$m-${d}T$h:$min:$sec+03:00";
+      }
+
+      String formatDateWithTimezone(DateTime dt) {
+        String twoDigits(int n) => n.toString().padLeft(2, '0');
+        String y = dt.year.toString();
+        String m = twoDigits(dt.month);
+        String d = twoDigits(dt.day);
+        return "$y-$m-${d}T00:00:00+03:00";
+      }
+
       final body = {
         "EmpCode": empCode,
         "CompEmpCode": compEmpCode,
@@ -1013,6 +1035,10 @@ class HrProvider with ChangeNotifier {
         "Serial": nextSerial,
         "AltKey": "$empCode-$nextSerial",
         "InsertUser": insertUser,
+        // ---== الإضافة الجديدة ==---
+        if (prmToDate != null)
+          "PRM_TO_DATE": formatDateWithTimezone(prmToDate),
+        // ------------------------
       };
 
       final String url = ApiConstants.baseUrl + ApiConstants.createPermissionRequestEndpoint;
@@ -2197,4 +2223,31 @@ class HrProvider with ChangeNotifier {
       return false;
     }
   }
+
+  // ---== إضافة خاصة بالعمال ==---
+  List<WorkerModel> _workersList = [];
+  List<WorkerModel> get workersList => _workersList;
+
+  Future<void> fetchWorkersList(int usersCode) async {
+    // _setLoadingState(true); // ممكن تخليها تحميل خفي لو مش عايز توقف الشاشة
+    try {
+      // لاحظ هنا استخدمنا api_constants لو ضفت فيها الرابط، أو نكتبه مباشرة كما طلبت
+      final String url = '${ApiConstants.baseUrl}/PyPrsnlHSecVRO1?q=UsersCode=$usersCode';
+
+      final data = await _dataFetchService.fetchDataFromUrl(url);
+      if (data != null && data['items'] != null) {
+        _workersList = (data['items'] as List)
+            .map((item) => WorkerModel.fromJson(item))
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error fetching workers: $e');
+      // _handleError(e.toString());
+    } finally {
+      // _setLoadingState(false);
+    }
+  }
+
+
 }
